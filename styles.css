@@ -1,0 +1,132 @@
+/* Typogaphy */
+
+#body {
+  font-family: 'Prompt', sans-serif;
+}
+
+.logo {
+    /*position: absolute;
+    left: 20px;
+    top: 20px;*/
+    float: left;
+    padding-right: 12px;
+}
+
+a {
+    color: white !important;
+}
+
+.navbar {
+    padding-left:2em;
+}
+
+.nav-link:hover {
+    -webkit-filter: brightness(96%);
+   filter: brightness(96%);
+    color: white;
+    font-size: 1.02em;
+    text-decoration: none;
+}
+ 
+.green-header {
+  background-color: #91C653;
+  color: white;
+    padding-top: 1em;
+    padding-bottom: 6em;
+
+}
+    
+.container {
+  display: flex; /* or inline-flex */
+}
+
+.pepbot {
+    padding-top: 40px;
+} 
+
+#header {
+  /*margin: 50px 200px;
+  padding: 0px;*/
+    margin-left: 20%;
+    margin-right: 20%;
+    max-width: 768px;
+}
+
+#header h1 {
+    font-size: 56px;
+    font-weight: bold;
+    letter-spacing: 0.05em;
+    padding-top: 1em;
+}
+
+#how-it-works {
+  /*margin: 20px 200px;*/
+    margin-top: 40px;
+    margin-left: 20%;
+    margin-right: 20%;
+    max-width: 768px;
+}
+
+#how-it-works h2 {
+  color: #4A4A4A;
+}
+
+.col-md-7 p {
+  margin: 15px 25px;
+    font-size: 20px;
+    color: #4A4A4A;
+}
+
+.add-to-slack {
+  background-color: #4A4A4A;
+  min-height: 200px;
+}
+
+.slack-btn {
+  min-height: 100px;
+  min-width: 400px;
+  margin: 100px auto;
+  display: block;
+  vertical-align: middle;
+}
+
+.slack-btn:hover {
+    -webkit-filter: brightness(90%);
+   filter: brightness(90%);
+}
+    
+
+.footer {
+    height: 60px;
+}
+
+.footer img {
+    display: block;
+    margin: auto;
+    padding: 10px;
+}
+
+/* Why Pepper */
+
+#why {
+    background: #91C653;
+    color: white;
+    font-family: 'prompt', sans-serif;
+}
+
+#back {
+    padding-top: 48px;
+    display: block;
+    font-size: 18px;
+}
+
+#blurb {
+    font-size: 33px;
+    font-weight: normal;
+    line-height: 1.3em;
+    font-family: 'prompt', sans-serif;
+}
+
+
+
+
