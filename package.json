@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "botkit": "^0.4.7",
+    "node-schedule": "^1.2.1",
     "redis": "*"
   },
   "engines": {
@@ -19,7 +20,6 @@
     "type": "git",
     "url": "git+https://github.com/shannonjanehogan/encourage-bot.git"
   },
-  
   "bugs": {
     "url": "https://github.com/shannonjanehogan/encourage-bot/issues"
   },
