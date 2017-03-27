@@ -1,1 +1,1 @@
-web: node botkit-master/slack_bot.js
+web: node pepbot.js
