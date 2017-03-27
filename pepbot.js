@@ -73,7 +73,7 @@ var moment = require('moment');
 
 // Botkit-based Redis store
 var Redis_Store = require('./redis_storage.js');
-var redis_url = process.env.REDIS_URL || "redis://127.0.0.1:6379"; //TODO: use the value given by redis, after adding integration to heroku app (should be long URL, something like "rredis://h:p14f0ad0d4e92c182998f4fff029cd52a44d4c6d77c488907fcd68d7fc7b0e@ec2-107-22-239-248.compute-1.amazonaws.com:24139")
+var redis_url = "redis://h:pea00b467cde6d2e40b066669800b42275e206224ecd873f08af3ef3e65e08a32@ec2-34-194-51-203.compute-1.amazonaws.com:28839";
 var redis_store = new Redis_Store({url: redis_url});
 
 // Programmatically use appropriate process environment variables
