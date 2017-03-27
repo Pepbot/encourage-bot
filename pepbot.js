@@ -142,7 +142,7 @@ var controller = Botkit.slackbot({
 controller.setupWebserver(port,function(err,webserver) {
 
   webserver.get('/',function(req,res) {
-    res.sendFile('index.html', {root: __dirname});
+    res.sendFile(__dirname + '/index.html');
   });
 
   controller.createWebhookEndpoints(controller.webserver);
