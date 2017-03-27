@@ -11,7 +11,8 @@
   "dependencies": {
     "botkit": "^0.4.7",
     "node-schedule": "^1.2.1",
-    "redis": "*"
+    "redis": "*",
+    "when": "^3.7.8"
   },
   "engines": {
     "node": "*"
