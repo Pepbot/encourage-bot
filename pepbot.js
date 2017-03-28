@@ -109,37 +109,9 @@ var controller = Botkit.slackbot({
     scopes: ['bot'],
   }
 );
-
-/*controller.setupWebserver(port,function(err,webserver) {
-
-    app.set("view engine", "ejs");
-
-    app.get("/", (req, res) => {
-      res.render("encouragesplash");
-    });
-
-    app.get("/why-pepper", (req, res) => {
-      res.render("whypepper");
-    });
-
-    app.use(express.static(__dirname + '/styles'));
-
-    app.listen((process.env.PORT || 3000), () => {
-      console.log("Example app listening on port ");
-    });
-
-
-  controller.createWebhookEndpoints(controller.webserver);
-  controller.createOauthEndpoints(controller.webserver,function(err,req,res) {
-    if (err) {
-      res.status(500).send('ERROR: ' + err);
-    } else {
-      res.send('Success!');
-    }
-  });
-});*/
-
+console.log("JUST FINISHED SETTING UP REDIS");
 controller.setupWebserver(port,function(err,webserver) {
+    console.log("SETTING UP WEBSERVER");
 
   webserver.get('/',function(req,res) {
     res.sendFile(__dirname + '/public/index.html');
@@ -159,13 +131,6 @@ controller.createOauthEndpoints(controller.webserver,function(err,req,res) {
   });
 });
 
-// var controller = Botkit.slackbot({
-//     debug: false,
-// });
-
-// var bot = controller.spawn({
-//     token: process.env.token
-// }).startRTM();
 
 // To make sure we don't connect to the RTM twice for the same team
 var _bots = {};
