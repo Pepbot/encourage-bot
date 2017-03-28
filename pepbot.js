@@ -1,7 +1,7 @@
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
            ______     ______     ______   __  __     __     ______
           /\  == \   /\  __ \   /\__  _\ /\ \/ /    /\ \   /\__  _\
-          \ \  __<   \ \ \/\ \  \/_/\ \/ \ \  _"-.  \ \ \  \/_/\ \/
+          \ \  __<   \ \ \/\ \  \/_/\ \/ \ \  _'-.  \ \ \  \/_/\ \/
            \ \_____\  \ \_____\    \ \_\  \ \_\ \_\  \ \_\    \ \_\
             \/_____/   \/_____/     \/_/   \/_/\/_/   \/_/     \/_/
 
@@ -11,7 +11,7 @@ This is a sample Slack bot built with Botkit.
 This bot demonstrates many of the core features of Botkit:
 
 * Connect to Slack using the real time API
-* Receive messages based on "spoken" patterns
+* Receive messages based on 'spoken' patterns
 * Reply to messages
 * Use the conversation system to ask questions
 * Use the built in storage system to store and retrieve information
@@ -31,23 +31,23 @@ This bot demonstrates many of the core features of Botkit:
 
   Find your bot inside Slack to send it a direct message.
 
-  Say: "Hello"
+  Say: 'Hello'
 
-  The bot will reply "Hello!"
+  The bot will reply 'Hello!'
 
-  Say: "who are you?"
+  Say: 'who are you?'
 
   The bot will tell you its name, where it is running, and for how long.
 
-  Say: "Call me <nickname>"
+  Say: 'Call me <nickname>'
 
   Tell the bot your nickname. Now you are friends.
 
-  Say: "who am I?"
+  Say: 'who am I?'
 
   The bot will tell you your nickname, if it knows one for you.
 
-  Say: "shutdown"
+  Say: 'shutdown'
 
   The bot will ask if you are sure, and then shut itself down.
 
@@ -63,42 +63,34 @@ This bot demonstrates many of the core features of Botkit:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
-var Botkit = require('botkit');
-var schedule = require('node-schedule');
-var os = require('os');
-var when = require('when');
-var moment = require('moment');
-//const express     = require("express");
-//const app         = express();
-
+const Botkit = require('botkit');
+const schedule = require('node-schedule');
+const os = require('os');
+const when = require('when');
+const moment = require('moment');
 // Botkit-based Redis store
-var Redis_Store = require('./redis_storage.js');
-var redis_url = "redis://h:pea00b467cde6d2e40b066669800b42275e206224ecd873f08af3ef3e65e08a32@ec2-34-194-51-203.compute-1.amazonaws.com:28839";
-var redis_store = new Redis_Store({url: redis_url});
+const Redis_Store = require('./redis_storage.js');
+
+const redis_url = 'redis://h:pea00b467cde6d2e40b066669800b42275e206224ecd873f08af3ef3e65e08a32@ec2-34-194-51-203.compute-1.amazonaws.com:28839';
+const redis_store = new Redis_Store({url: redis_url});
 
 // Programmatically use appropriate process environment variables
  try {
    require('./env.js');
  } catch (e) {
    if (e.code === 'MODULE_NOT_FOUND') {
-     console.log('Not using environment variables from env.js');
+    console.log('Not using environment variables from env.js');
    }
  }
 
- var port = process.env.PORT || process.env.port;
-
-// if (!process.env.token) {
-//     console.log('Error: Specify token in environment');
-//     process.exit(1);
-// }
+const port = process.env.PORT || process.env.port;
 
 // Taken from howdya botkit tutorial
 if (!process.env.clientId || !process.env.clientSecret || !port) {
   console.log('Error: Specify clientId clientSecret redirectUri and port in environment');
-  //process.exit(1);
 }
 
-var controller = Botkit.slackbot({
+const controller = Botkit.slackbot({
   storage: redis_store,
   // rtm_receive_messages: false, // disable rtm_receive_messages if you enable events api
 }).configureSlackApp(
@@ -110,43 +102,11 @@ var controller = Botkit.slackbot({
   }
 );
 
-/*controller.setupWebserver(port,function(err,webserver) {
-
-    app.set("view engine", "ejs");
-
-    app.get("/", (req, res) => {
-      res.render("encouragesplash");
-    });
-
-    app.get("/why-pepper", (req, res) => {
-      res.render("whypepper");
-    });
-
-    app.use(express.static(__dirname + '/styles'));
-
-    app.listen((process.env.PORT || 3000), () => {
-      console.log("Example app listening on port ");
-    });
-
-
-  controller.createWebhookEndpoints(controller.webserver);
-  controller.createOauthEndpoints(controller.webserver,function(err,req,res) {
-    if (err) {
-      res.status(500).send('ERROR: ' + err);
-    } else {
-      res.send('Success!');
-    }
-  });
-});*/
-
 controller.setupWebserver(port,function(err,webserver) {
-
   webserver.get('/',function(req,res) {
     res.sendFile(__dirname + '/public/index.html');
   });
-
   controller.createWebhookEndpoints(controller.webserver);
-
   controller.createOauthEndpoints(controller.webserver,function(err,req,res) {
     if (err) {
       res.status(500).send('ERROR: ' + err);
@@ -156,14 +116,6 @@ controller.setupWebserver(port,function(err,webserver) {
   });
 });
 
-// var controller = Botkit.slackbot({
-//     debug: false,
-// });
-
-// var bot = controller.spawn({
-//     token: process.env.token
-// }).startRTM();
-
 // To make sure we don't connect to the RTM twice for the same team
 let _bots = {};
 function trackBot(bot) {
@@ -171,15 +123,15 @@ function trackBot(bot) {
 }
 
 controller.on('create_bot',function(bot,config) {
-  console.log("create bot...");
+  console.log('create bot...');
   if (_bots[bot.config.token]) {
-    console.log("bot appears to already be online");
+    console.log('bot appears to already be online');
     // already online! do nothing.
   } else {
-    console.log("starting RTM...");
+    console.log('starting RTM...');
     bot.startRTM(function(err) {
       if (!err) {
-        console.log("successfully started RTM");
+        console.log('successfully started RTM');
         trackBot(bot);
       }
       bot.startPrivateConversation({user: config.createdBy},function(err,convo) {
@@ -206,15 +158,15 @@ controller.on('rtm_close',function(bot) {
 
 controller.hears(['flag'], 'direct_message', function(bot, message) {
   sendFlaggedMessageToAdmin(bot, message);
-  bot.reply(message, "I'll notify the team's admin that the last message was inappropriate.");
+  bot.reply(message, 'I\'ll notify the team\'s admin that the last message was inappropriate.');
 });
 
 function getAdminUsers() {
-  var admin_users = [];
+  let admin_users = [];
   bot.api.users.list({}, function (err, response) {
     if (response.hasOwnProperty('members') && response.ok) {
       let members = response.members;
-      for (var i = 0; i < members.length; i++) {
+      for (let i = 0; i < members.length; i++) {
         if (members[i].is_admin) {
             admin_users.push(members[i]);
         }
@@ -225,15 +177,15 @@ function getAdminUsers() {
 }
 
 function sendFlaggedMessageToAdmin(bot, message) {
-    // var admin_users = when(getAdminUsers).then(function(message) {
-    //     sendAdminMessage(admin_users, message);
-    // }).catch(console.error);
-    const admin_users = getAdminUsers();
-    setTimeout(function(){ sendAdminMessage(admin_users, message)},1000);
+  // var admin_users = when(getAdminUsers).then(function(message) {
+  //     sendAdminMessage(admin_users, message);
+  // }).catch(console.error);
+  const admin_users = getAdminUsers();
+  setTimeout(function(){ sendAdminMessage(admin_users, message)},1000);
 }
 
 function sendAdminMessage(admin_users, message) {
-  for (var i = 0; i < admin_users.length; i++) {
+  for (let i = 0; i < admin_users.length; i++) {
     const user = admin_users[i];
     bot.api.im.open({
       user: user.id
@@ -246,7 +198,7 @@ function sendAdminMessage(admin_users, message) {
         user: user.id,
         channel: res.channel.id,
       }, (err, convo) => {
-        convo.say("Just so you know, <@" + message.user + "> flagged a message as inappropriate. Please investigate.");
+        convo.say('Just so you know, <@' + message.user + '> flagged a message as inappropriate. Please investigate.');
       });
     })
   }
@@ -267,21 +219,18 @@ function findUserAndRecipient(bot) {
           members.push(member);
         }
       });
-      // console.log(members);
-      const weekNumber = moment("11-15-2016", "MM-DD-YYYY").week();
+      const weekNumber = moment('11-15-2016', 'MM-DD-YYYY').week();
       let counter = weekNumber % members.length;
       console.log(counter);
       for (let i = 0; i < members.length; i++) {
         let username = members[i];
         let counter2 = (i + counter) % members.length;
         let recipient = members[counter2].name;
-        // console.log(username, recipient);
         sendMondayMessage(bot, username, recipient);
       }
     }
   });
 }
-
 
 function sendMondayMessage(bot, username, recipient) {
   bot.api.im.open({
@@ -294,7 +243,7 @@ function sendMondayMessage(bot, username, recipient) {
       user: username,
       channel: res.channel.id,
     }, (err, convo) => {
-      convo.say("Please pep up " + recipient + " with positive feedback for the week \n Type \'tell @" + recipient + "\' and a message to send your peppy message anonymously ");
+      convo.say(`Please pep up ${recipient} with positive feedback for the week \n Type \'tell @${recipient} \' and a message to send your peppy message anonymously`);
     });
   });
 }
@@ -306,7 +255,6 @@ function sendEncouragement(bot, username, encouragement) {
     if (err) {
       bot.botkit.log('Failed to open IM with user', err)
     }
-    console.log(res);
     bot.startConversation({
       user: username,
       channel: res.channel.id,
@@ -323,7 +271,7 @@ controller.hears(['tell @*'], 'direct_message', function(bot, message) {
 });
 
 function getUsername(message) {
-  const arr = message.split(" ");
+  const arr = message.split(' ');
   const username = arr[1];
   username = username.toString();
   username = username.replace('@', '');
@@ -333,7 +281,7 @@ function getUsername(message) {
 }
 
 function getEncouragement(encouragement) {
-  const arr = encouragement.split(" ");
+  const arr = encouragement.split(' ');
   arr.splice(0, 2);
   return arr.join(' ');
 }
@@ -348,7 +296,7 @@ controller.hears(['pepper'], 'direct_message,direct_mention,ambient', function(b
       bot.botkit.log('Failed to add emoji reaction :(', err);
     }
   });
-  bot.reply(message, "That's my name!!");
+  bot.reply(message, 'That\'s my name!!');
 });
 
 controller.hears(['help'], 'direct_message,direct_mention,ambient', function(bot, message) {
@@ -358,20 +306,20 @@ controller.hears(['help'], 'direct_message,direct_mention,ambient', function(bot
     name: 'hatched_chick',
   });
   bot.reply(message, {
-  "attachments": [
+  'attachments': [
     {
-      "fallback": "Required plain-text summary of the attachment.",
-      "pretext": "Need some help? Here’s what I do:\n\nSend You Reminders: I’ll send you a message here reminding you to send some encouragement to one of your team mates each week. Like this:",
-      "text": "Hi <@" + message.user + ">! Send @[recipient name] some encouragement to pep up their day! :hot_pepper:",
+      'fallback': 'Required plain-text summary of the attachment.',
+      'pretext': 'Need some help? Here’s what I do:\n\nSend You Reminders: I’ll send you a message here reminding you to send some encouragement to one of your team mates each week. Like this:',
+      'text': 'Hi <@' + message.user + '>! Send @[recipient name] some encouragement to pep up their day! :hot_pepper:',
     },
     {
-      "fallback": "Required plain-text summary of the attachment.",
-      "pretext": "Deliver Your Messages: Let me know who to send the message to by typing ‘tell’ followed by the name of your team mate. Like this:",
-      "text": "tell @name You did an awesome job this morning! :raised_hands:",
+      'fallback': 'Required plain-text summary of the attachment.',
+      'pretext': 'Deliver Your Messages: Let me know who to send the message to by typing ‘tell’ followed by the name of your team mate. Like this:',
+      'text': 'tell @name You did an awesome job this morning! :raised_hands:',
     },
     {
-      "fallback": "Summary",
-      "pretext": "Keep It Positive: Report any abusive comments by replying with the word ‘flag’.:triangular_flag_on_post:"
+      'fallback': 'Summary',
+      'pretext': 'Keep It Positive: Report any abusive comments by replying with the word ‘flag’.:triangular_flag_on_post:'
     }]
   });
 });
@@ -402,7 +350,7 @@ controller.hears(['party'], 'direct_message,direct_mention,ambient', function(bo
     channel: message.channel,
     name: 'lollipop',
   });
-  bot.reply(message, "It's party time!!!!!");
+  bot.reply(message, 'It\'s party time!!!!!');
 });
 
 controller.hears(['hello', 'hi', 'hey', 'yo'], 'direct_message,direct_mention,mention', function(bot, message) {
