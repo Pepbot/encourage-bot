@@ -1,4 +1,4 @@
-/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
            ______     ______     ______   __  __     __     ______
           /\  == \   /\  __ \   /\__  _\ /\ \/ /    /\ \   /\__  _\
           \ \  __<   \ \ \/\ \  \/_/\ \/ \ \  _'-.  \ \ \  \/_/\ \/
@@ -72,16 +72,16 @@ const moment = require('moment');
 const Redis_Store = require('./redis_storage.js');
 
 const redis_url = 'redis://h:pea00b467cde6d2e40b066669800b42275e206224ecd873f08af3ef3e65e08a32@ec2-34-194-51-203.compute-1.amazonaws.com:28839';
-const redis_store = new Redis_Store({url: redis_url});
+const redis_store = new Redis_Store({ url: redis_url });
 
 // Programmatically use appropriate process environment variables
- try {
-   require('./env.js');
- } catch (e) {
-   if (e.code === 'MODULE_NOT_FOUND') {
+try {
+  require('./env.js');
+} catch (e) {
+  if (e.code === 'MODULE_NOT_FOUND') {
     console.log('Not using environment variables from env.js');
-   }
- }
+  }
+}
 
 const port = process.env.PORT || process.env.port;
 
@@ -99,17 +99,17 @@ const controller = Botkit.slackbot({
     clientSecret: process.env.clientSecret,
     redirectUri: process.env.redirectUri, // optional parameter passed to slackbutton oauth flow
     scopes: ['bot'],
-  }
+  },
 );
 
-controller.setupWebserver(port,function(err,webserver) {
-  webserver.get('/',function(req,res) {
-    res.sendFile(__dirname + '/public/index.html');
+controller.setupWebserver(port, (err, webserver) => {
+  webserver.get('/', (req, res) => {
+    res.sendFile(`${__dirname}/public/index.html`);
   });
   controller.createWebhookEndpoints(controller.webserver);
-  controller.createOauthEndpoints(controller.webserver,function(err,req,res) {
+  controller.createOauthEndpoints(controller.webserver, (err, req, res) => {
     if (err) {
-      res.status(500).send('ERROR: ' + err);
+      res.status(500).send(`ERROR: ${err}`);
     } else {
       res.send('Success!');
     }
@@ -117,28 +117,28 @@ controller.setupWebserver(port,function(err,webserver) {
 });
 
 // To make sure we don't connect to the RTM twice for the same team
-let _bots = {};
+const _bots = {};
 function trackBot(bot) {
   _bots[bot.config.token] = bot;
 }
 
-controller.on('create_bot',function(bot,config) {
+controller.on('create_bot', (bot, config) => {
   console.log('create bot...');
   if (_bots[bot.config.token]) {
     console.log('bot appears to already be online');
     // already online! do nothing.
   } else {
     console.log('starting RTM...');
-    bot.startRTM(function(err) {
+    bot.startRTM((err) => {
       if (!err) {
         console.log('successfully started RTM');
         trackBot(bot);
       }
-      bot.startPrivateConversation({user: config.createdBy},function(err,convo) {
+      bot.startPrivateConversation({ user: config.createdBy }, (err, convo) => {
         if (err) {
           console.log(err);
         } else {
-          convo.say('I am a bot that has just joined your team');  //TODO: use better message
+          convo.say('I am a bot that has just joined your team');  // TODO: use better message
           convo.say('You must now /invite me to a channel so that I can be of use!');
         }
       });
@@ -147,28 +147,28 @@ controller.on('create_bot',function(bot,config) {
 });
 
 // Handle events related to the websocket connection to Slack
-controller.on('rtm_open',function(bot) {
+controller.on('rtm_open', (bot) => {
   console.log('** The RTM api just connected!');
 });
 
-controller.on('rtm_close',function(bot) {
+controller.on('rtm_close', (bot) => {
   console.log('** The RTM api just closed');
   // you may want to attempt to re-open
 });
 
-controller.hears(['flag'], 'direct_message', function(bot, message) {
+controller.hears(['flag'], 'direct_message', (bot, message) => {
   sendFlaggedMessageToAdmin(bot, message);
   bot.reply(message, 'I\'ll notify the team\'s admin that the last message was inappropriate.');
 });
 
 function getAdminUsers() {
-  let admin_users = [];
-  bot.api.users.list({}, function (err, response) {
+  const admin_users = [];
+  bot.api.users.list({}, (err, response) => {
     if (response.hasOwnProperty('members') && response.ok) {
-      let members = response.members;
+      const members = response.members;
       for (let i = 0; i < members.length; i++) {
         if (members[i].is_admin) {
-            admin_users.push(members[i]);
+          admin_users.push(members[i]);
         }
       }
     }
@@ -181,51 +181,51 @@ function sendFlaggedMessageToAdmin(bot, message) {
   //     sendAdminMessage(admin_users, message);
   // }).catch(console.error);
   const admin_users = getAdminUsers();
-  setTimeout(function(){ sendAdminMessage(admin_users, message)},1000);
+  setTimeout(() => { sendAdminMessage(admin_users, message); }, 1000);
 }
 
 function sendAdminMessage(admin_users, message) {
   for (let i = 0; i < admin_users.length; i++) {
     const user = admin_users[i];
     bot.api.im.open({
-      user: user.id
+      user: user.id,
     }, (err, res) => {
       if (err) {
-        bot.botkit.log('Failed to open IM with user', err)
+        bot.botkit.log('Failed to open IM with user', err);
       }
       console.log(res);
       bot.startConversation({
         user: user.id,
         channel: res.channel.id,
       }, (err, convo) => {
-        convo.say('Just so you know, <@' + message.user + '> flagged a message as inappropriate. Please investigate.');
+        convo.say(`Just so you know, <@${message.user}> flagged a message as inappropriate. Please investigate.`);
       });
-    })
+    });
   }
 }
 
-controller.hears(['test'], 'direct_message', function(bot, message) {
+controller.hears(['test'], 'direct_message', (bot, message) => {
   findUserAndRecipient(bot);
 });
 
 // Loops through the users in the team, for each user calls the sendMondayMessage function to determine the recipient
 function findUserAndRecipient(bot) {
     // controller.hears(['test'], 'direct_message', function(bot, message) {
-  bot.api.users.list({}, function (err, response) {
+  bot.api.users.list({}, (err, response) => {
     if (response.hasOwnProperty('members') && response.ok) {
-      let members = []
-      response.members.forEach(function(member) {
+      const members = [];
+      response.members.forEach((member) => {
         if (!member.is_bot) {
           members.push(member);
         }
       });
       const weekNumber = moment('11-15-2016', 'MM-DD-YYYY').week();
-      let counter = weekNumber % members.length;
+      const counter = weekNumber % members.length;
       console.log(counter);
       for (let i = 0; i < members.length; i++) {
-        let username = members[i];
-        let counter2 = (i + counter) % members.length;
-        let recipient = members[counter2].name;
+        const username = members[i];
+        const counter2 = (i + counter) % members.length;
+        const recipient = members[counter2].name;
         sendMondayMessage(bot, username, recipient);
       }
     }
@@ -234,10 +234,10 @@ function findUserAndRecipient(bot) {
 
 function sendMondayMessage(bot, username, recipient) {
   bot.api.im.open({
-    user: username.id
+    user: username.id,
   }, (err, res) => {
     if (err) {
-      bot.botkit.log('Failed to open IM with user', err)
+      bot.botkit.log('Failed to open IM with user', err);
     }
     bot.startConversation({
       user: username,
@@ -250,10 +250,10 @@ function sendMondayMessage(bot, username, recipient) {
 
 function sendEncouragement(bot, username, encouragement) {
   bot.api.im.open({
-    user: username
+    user: username,
   }, (err, res) => {
     if (err) {
-      bot.botkit.log('Failed to open IM with user', err)
+      bot.botkit.log('Failed to open IM with user', err);
     }
     bot.startConversation({
       user: username,
@@ -264,7 +264,7 @@ function sendEncouragement(bot, username, encouragement) {
   });
 }
 
-controller.hears(['tell @*'], 'direct_message', function(bot, message) {
+controller.hears(['tell @*'], 'direct_message', (bot, message) => {
   const username = getUsername(message.text);
   const encouragement = getEncouragement(message.text);
   sendEncouragement(bot, username, encouragement);
@@ -286,12 +286,12 @@ function getEncouragement(encouragement) {
   return arr.join(' ');
 }
 
-controller.hears(['pepper'], 'direct_message,direct_mention,ambient', function(bot, message) {
+controller.hears(['pepper'], 'direct_message,direct_mention,ambient', (bot, message) => {
   bot.api.reactions.add({
     timestamp: message.ts,
     channel: message.channel,
     name: 'hot_pepper',
-  }, function(err, res) {
+  }, (err, res) => {
     if (err) {
       bot.botkit.log('Failed to add emoji reaction :(', err);
     }
@@ -299,32 +299,32 @@ controller.hears(['pepper'], 'direct_message,direct_mention,ambient', function(b
   bot.reply(message, 'That\'s my name!!');
 });
 
-controller.hears(['help'], 'direct_message,direct_mention,ambient', function(bot, message) {
+controller.hears(['help'], 'direct_message,direct_mention,ambient', (bot, message) => {
   bot.api.reactions.add({
     timestamp: message.ts,
     channel: message.channel,
     name: 'hatched_chick',
   });
   bot.reply(message, {
-  'attachments': [
-    {
-      'fallback': 'Required plain-text summary of the attachment.',
-      'pretext': 'Need some help? Here’s what I do:\n\nSend You Reminders: I’ll send you a message here reminding you to send some encouragement to one of your team mates each week. Like this:',
-      'text': 'Hi <@' + message.user + '>! Send @[recipient name] some encouragement to pep up their day! :hot_pepper:',
-    },
-    {
-      'fallback': 'Required plain-text summary of the attachment.',
-      'pretext': 'Deliver Your Messages: Let me know who to send the message to by typing ‘tell’ followed by the name of your team mate. Like this:',
-      'text': 'tell @name You did an awesome job this morning! :raised_hands:',
-    },
-    {
-      'fallback': 'Summary',
-      'pretext': 'Keep It Positive: Report any abusive comments by replying with the word ‘flag’.:triangular_flag_on_post:'
-    }]
+    attachments: [
+      {
+        fallback: 'Required plain-text summary of the attachment.',
+        pretext: 'Need some help? Here’s what I do:\n\nSend You Reminders: I’ll send you a message here reminding you to send some encouragement to one of your team mates each week. Like this:',
+        text: `Hi <@${message.user}>! Send @[recipient name] some encouragement to pep up their day! :hot_pepper:`,
+      },
+      {
+        fallback: 'Required plain-text summary of the attachment.',
+        pretext: 'Deliver Your Messages: Let me know who to send the message to by typing ‘tell’ followed by the name of your team mate. Like this:',
+        text: 'tell @name You did an awesome job this morning! :raised_hands:',
+      },
+      {
+        fallback: 'Summary',
+        pretext: 'Keep It Positive: Report any abusive comments by replying with the word ‘flag’.:triangular_flag_on_post:',
+      }],
   });
 });
 
-controller.hears(['party'], 'direct_message,direct_mention,ambient', function(bot, message) {
+controller.hears(['party'], 'direct_message,direct_mention,ambient', (bot, message) => {
   bot.api.reactions.add({
     timestamp: message.ts,
     channel: message.channel,
@@ -353,61 +353,61 @@ controller.hears(['party'], 'direct_message,direct_mention,ambient', function(bo
   bot.reply(message, 'It\'s party time!!!!!');
 });
 
-controller.hears(['hello', 'hi', 'hey', 'yo'], 'direct_message,direct_mention,mention', function(bot, message) {
+controller.hears(['hello', 'hi', 'hey', 'yo'], 'direct_message,direct_mention,mention', (bot, message) => {
   bot.api.reactions.add({
     timestamp: message.ts,
     channel: message.channel,
     name: 'robot_face',
-  }, function(err, res) {
+  }, (err, res) => {
     if (err) {
       bot.botkit.log('Failed to add emoji reaction :(', err);
     }
   });
-  controller.storage.users.get(message.user, function(err, user) {
+  controller.storage.users.get(message.user, (err, user) => {
     if (user && user.name) {
-      bot.reply(message, 'Hello ' + user.name + '!!');
+      bot.reply(message, `Hello ${user.name}!!`);
     } else {
       bot.reply(message, 'Hiya :)');
     }
   });
 });
 
-controller.hears(['call me (.*)', 'my name is (.*)'], 'direct_message,direct_mention,mention', function(bot, message) {
-    const name = message.match[1];
-    controller.storage.users.get(message.user, function(err, user) {
-      if (!user) {
-        user = {
-          id: message.user,
-        };
-      }
-      user.name = name;
-      controller.storage.users.save(user, function(err, id) {
-        bot.reply(message, 'Got it. I will call you ' + user.name + ' from now on.');
-      });
+controller.hears(['call me (.*)', 'my name is (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
+  const name = message.match[1];
+  controller.storage.users.get(message.user, (err, user) => {
+    if (!user) {
+      user = {
+        id: message.user,
+      };
+    }
+    user.name = name;
+    controller.storage.users.save(user, () => {
+      bot.reply(message, `Got it. I will call you ${user.name} from now on.`);
     });
+  });
 });
 
-controller.hears(['uptime', 'identify yourself', 'who are you', 'what is your name'],
-  'direct_message,direct_mention,mention', function(bot, message) {
-  const hostname = os.hostname();
-  const uptime = formatUptime(process.uptime());
-  bot.reply(message, ':robot_face: I am a bot named <@' + bot.identity.name + '>. I have been running for ' + uptime + ' on ' + hostname + '.');
-
-});
-
-function formatUptime(uptime) {
-  const unit = 'second';
+function formatUptime(uptimeParam) {
+  let unit = 'second';
+  let uptime = uptimeParam;
   if (uptime > 60) {
-      uptime = uptime / 60;
-      unit = 'minute';
+    uptime /= 60;
+    unit = 'minute';
   }
   if (uptime > 60) {
-      uptime = uptime / 60;
-      unit = 'hour';
+    uptime /= 60;
+    unit = 'hour';
   }
-  if (uptime != 1) {
-      unit = unit + 's';
+  if (uptime !== 1) {
+    unit = `${unit}s`;
   }
-  uptime = uptime + ' ' + unit;
+  uptime = `${uptime} ${unit}`;
   return uptime;
 }
+
+controller.hears(['uptime', 'identify yourself', 'who are you', 'what is your name'],
+  'direct_message,direct_mention,mention', (bot, message) => {
+    const hostname = os.hostname();
+    const uptime = formatUptime(process.uptime());
+    bot.reply(message, `:robot_face: I am a bot named <@${bot.identity.name}>. I have been running for ${uptime} on ${hostname}.`);
+  });
