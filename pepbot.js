@@ -145,13 +145,16 @@ controller.setupWebserver(port,function(err,webserver) {
     res.sendFile(__dirname + '/public/index.html');
   });
 
-  controller.createWebhookEndpoints(controller.webserver);
+controller.createWebhookEndpoints(controller.webserver);
 
-  controller.createOauthEndpoints(controller.webserver,function(err,req,res) {
+controller.createOauthEndpoints(controller.webserver,function(err,req,res) {
+    console.log("INSIDE OAUTH ENDPOINT CODE");
     if (err) {
-      res.status(500).send('ERROR: ' + err);
+        console.log("ERRORRRR");
+        res.status(500).send('ERROR: ' + err);
     } else {
-      res.send('Success!');
+        console.log("SHOULD HAVE SUCCEEDED");
+        res.send('Success!');
     }
   });
 });
