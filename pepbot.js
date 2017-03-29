@@ -114,7 +114,7 @@ controller.setupWebserver(port,function(err,webserver) {
     console.log("SETTING UP WEBSERVER");
 
   webserver.get('/',function(req,res) {
-    res.sendFile(__dirname + '/public/index.html');
+    res.sendFile(__dirname + '/index.html');
   });
 
 controller.createWebhookEndpoints(controller.webserver);
