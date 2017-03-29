@@ -1,1 +1,1 @@
-web: node pepbot.js
+node pepbot.js
