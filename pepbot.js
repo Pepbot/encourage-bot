@@ -6,7 +6,7 @@
             \/_____/   \/_____/     \/_/   \/_/\/_/   \/_/     \/_/
 
 
-This is a sample Slack bot built with Botkit.
+This is a Slack bot built with Botkit.
 
 This bot demonstrates many of the core features of Botkit:
 
@@ -14,52 +14,6 @@ This bot demonstrates many of the core features of Botkit:
 * Receive messages based on "spoken" patterns
 * Reply to messages
 * Use the conversation system to ask questions
-* Use the built in storage system to store and retrieve information
-  for a user.
-
-# RUN THE BOT:
-
-  Get a Bot token from Slack:
-
-    -> http://my.slack.com/services/new/bot
-
-  Run your bot from the command line:
-
-    token=<MY TOKEN> node slack_bot.js
-
-# USE THE BOT:
-
-  Find your bot inside Slack to send it a direct message.
-
-  Say: "Hello"
-
-  The bot will reply "Hello!"
-
-  Say: "who are you?"
-
-  The bot will tell you its name, where it is running, and for how long.
-
-  Say: "Call me <nickname>"
-
-  Tell the bot your nickname. Now you are friends.
-
-  Say: "who am I?"
-
-  The bot will tell you your nickname, if it knows one for you.
-
-  Say: "shutdown"
-
-  The bot will ask if you are sure, and then shut itself down.
-
-  Make sure to invite your bot into other channels using /invite @<my bot>!
-
-# EXTEND THE BOT:
-
-  Botkit has many features for building cool and useful bots!
-
-  Read all about it here:
-
-    -> http://howdy.ai/botkit
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
@@ -68,8 +22,6 @@ var schedule = require('node-schedule');
 var os = require('os');
 var when = require('when');
 var moment = require('moment');
-//const express     = require("express");
-//const app         = express();
 
 // Botkit-based Redis store
 var Redis_Store = require('./redis_storage.js');
@@ -77,30 +29,22 @@ var redis_url = "redis://h:pea00b467cde6d2e40b066669800b42275e206224ecd873f08af3
 var redis_store = new Redis_Store({url: redis_url});
 
 // Programmatically use appropriate process environment variables
- try {
-   require('./env.js');
- } catch (e) {
-   if (e.code === 'MODULE_NOT_FOUND') {
-     console.log('Not using environment variables from env.js');
-   }
- }
+try {
+    require('./env.js');
+} catch (e) {
+    if (e.code === 'MODULE_NOT_FOUND') {
+        console.log('Not using environment variables from env.js');
+    }
+}
 
- var port = process.env.PORT || process.env.port;
+var port = process.env.PORT || process.env.port;
 
-// if (!process.env.token) {
-//     console.log('Error: Specify token in environment');
-//     process.exit(1);
-// }
-
-// Taken from howdya botkit tutorial
 if (!process.env.clientId || !process.env.clientSecret || !port) {
-  console.log('Error: Specify clientId clientSecret redirectUri and port in environment');
-  //process.exit(1);
+    console.log('Error: Specify clientId clientSecret redirectUri and port in environment');
 }
 
 var controller = Botkit.slackbot({
   storage: redis_store,
-  // rtm_receive_messages: false, // disable rtm_receive_messages if you enable events api
 }).configureSlackApp(
   {
     clientId: process.env.clientId,
@@ -109,9 +53,7 @@ var controller = Botkit.slackbot({
     scopes: ['bot'],
   }
 );
-console.log("JUST FINISHED SETTING UP REDIS");
 controller.setupWebserver(port,function(err,webserver) {
-    console.log("SETTING UP WEBSERVER");
 
   webserver.get('/',function(req,res) {
     res.sendFile(__dirname + '/index.html');
@@ -120,12 +62,9 @@ controller.setupWebserver(port,function(err,webserver) {
 controller.createWebhookEndpoints(controller.webserver);
 
 controller.createOauthEndpoints(controller.webserver,function(err,req,res) {
-    console.log("INSIDE OAUTH ENDPOINT CODE");
     if (err) {
-        console.log("ERRORRRR");
         res.status(500).send('ERROR: ' + err);
     } else {
-        console.log("SHOULD HAVE SUCCEEDED");
         res.send('Success!');
     }
   });
