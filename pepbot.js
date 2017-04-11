@@ -77,8 +77,10 @@ function trackBot(bot) {
   _bots[bot.config.token] = bot;
 }
 
-controller.on('create_bot',function(bot,config) {
+controller.on('create_bot',function(bot,config, message) {
   console.log("create bot...");
+
+  console.log('message', message);
 
   bot.reply(message, {
   "attachments": [
