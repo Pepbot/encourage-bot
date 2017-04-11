@@ -64,15 +64,13 @@ This bot demonstrates many of the core features of Botkit:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
 const Botkit = require('botkit');
-const schedule = require('node-schedule');
 const os = require('os');
-const when = require('when');
 const moment = require('moment');
 // Botkit-based Redis store
-const Redis_Store = require('./redis_storage.js');
+const Redis = require('./redis_storage.js');
 
-const redis_url = 'redis://h:pea00b467cde6d2e40b066669800b42275e206224ecd873f08af3ef3e65e08a32@ec2-34-194-51-203.compute-1.amazonaws.com:28839';
-const redis_store = new Redis_Store({ url: redis_url });
+const redisURL = 'redis://h:pea00b467cde6d2e40b066669800b42275e206224ecd873f08af3ef3e65e08a32@ec2-34-194-51-203.compute-1.amazonaws.com:28839';
+const RedisStore = new Redis({ url: redisURL });
 
 // Programmatically use appropriate process environment variables
 try {
@@ -91,25 +89,23 @@ if (!process.env.clientId || !process.env.clientSecret || !port) {
 }
 
 const controller = Botkit.slackbot({
-  storage: redis_store,
+  storage: RedisStore,
   // rtm_receive_messages: false, // disable rtm_receive_messages if you enable events api
-}).configureSlackApp(
-  {
-    clientId: process.env.clientId,
-    clientSecret: process.env.clientSecret,
-    redirectUri: process.env.redirectUri, // optional parameter passed to slackbutton oauth flow
-    scopes: ['bot'],
-  },
-);
+}).configureSlackApp({
+  clientId: process.env.clientId,
+  clientSecret: process.env.clientSecret,
+  redirectUri: process.env.redirectUri, // optional parameter passed to slackbutton oauth flow
+  scopes: ['bot'],
+});
 
 controller.setupWebserver(port, (err, webserver) => {
   webserver.get('/', (req, res) => {
     res.sendFile(`${__dirname}/public/index.html`);
   });
   controller.createWebhookEndpoints(controller.webserver);
-  controller.createOauthEndpoints(controller.webserver, (err, req, res) => {
-    if (err) {
-      res.status(500).send(`ERROR: ${err}`);
+  controller.createOauthEndpoints(controller.webserver, (e, req, res) => {
+    if (e) {
+      res.status(500).send(`ERROR: ${e}`);
     } else {
       res.send('Success!');
     }
@@ -123,7 +119,6 @@ function trackBot(bot) {
 }
 
 controller.on('create_bot', (bot, config) => {
-  console.log('create bot...');
   if (_bots[bot.config.token]) {
     console.log('bot appears to already be online');
     // already online! do nothing.
@@ -134,9 +129,9 @@ controller.on('create_bot', (bot, config) => {
         console.log('successfully started RTM');
         trackBot(bot);
       }
-      bot.startPrivateConversation({ user: config.createdBy }, (err, convo) => {
-        if (err) {
-          console.log(err);
+      bot.startPrivateConversation({ user: config.createdBy }, (error, convo) => {
+        if (error) {
+          console.log(error);
         } else {
           convo.say('I am a bot that has just joined your team');  // TODO: use better message
           convo.say('You must now /invite me to a channel so that I can be of use!');
@@ -147,68 +142,84 @@ controller.on('create_bot', (bot, config) => {
 });
 
 // Handle events related to the websocket connection to Slack
-controller.on('rtm_open', (bot) => {
+controller.on('rtm_open', () => {
   console.log('** The RTM api just connected!');
 });
 
-controller.on('rtm_close', (bot) => {
+controller.on('rtm_close', () => {
   console.log('** The RTM api just closed');
   // you may want to attempt to re-open
 });
 
-controller.hears(['flag'], 'direct_message', (bot, message) => {
-  sendFlaggedMessageToAdmin(bot, message);
-  bot.reply(message, 'I\'ll notify the team\'s admin that the last message was inappropriate.');
-});
-
 function getAdminUsers() {
-  const admin_users = [];
+  const adminUsers = [];
   bot.api.users.list({}, (err, response) => {
     if (response.hasOwnProperty('members') && response.ok) {
       const members = response.members;
-      for (let i = 0; i < members.length; i++) {
+      for (let i = 0; i < members.length; i + 1) {
         if (members[i].is_admin) {
-          admin_users.push(members[i]);
+          adminUsers.push(members[i]);
         }
       }
     }
   });
-  return admin_users;
+  return adminUsers;
 }
 
-function sendFlaggedMessageToAdmin(bot, message) {
-  // var admin_users = when(getAdminUsers).then(function(message) {
-  //     sendAdminMessage(admin_users, message);
-  // }).catch(console.error);
-  const admin_users = getAdminUsers();
-  setTimeout(() => { sendAdminMessage(admin_users, message); }, 1000);
-}
-
-function sendAdminMessage(admin_users, message) {
-  for (let i = 0; i < admin_users.length; i++) {
-    const user = admin_users[i];
+function sendAdminMessage(adminUsers, message) {
+  for (let i = 0; i < adminUsers.length; i++) {
+    const user = adminUsers[i];
     bot.api.im.open({
       user: user.id,
     }, (err, res) => {
       if (err) {
         bot.botkit.log('Failed to open IM with user', err);
       }
-      console.log(res);
       bot.startConversation({
         user: user.id,
         channel: res.channel.id,
-      }, (err, convo) => {
+      }, (convo) => {
         convo.say(`Just so you know, <@${message.user}> flagged a message as inappropriate. Please investigate.`);
       });
     });
   }
 }
 
-controller.hears(['test'], 'direct_message', (bot, message) => {
+function sendFlaggedMessageToAdmin(bot, message) {
+  // var adminUsers = when(getAdminUsers).then(function(message) {
+  //     sendAdminMessage(adminUsers, message);
+  // }).catch(console.error);
+  const adminUsers = getAdminUsers();
+  setTimeout(() => { sendAdminMessage(adminUsers, message); }, 1000);
+}
+
+controller.hears(['flag'], 'direct_message', (bot, message) => {
+  sendFlaggedMessageToAdmin(bot, message);
+  bot.reply(message, 'I\'ll notify the team\'s admin that the last message was inappropriate.');
+});
+
+controller.hears(['test'], 'direct_message', (bot) => {
   findUserAndRecipient(bot);
 });
 
-// Loops through the users in the team, for each user calls the sendMondayMessage function to determine the recipient
+function sendMondayMessage(bot, username, recipient) {
+  bot.api.im.open({
+    user: username.id,
+  }, (err, res) => {
+    if (err) {
+      bot.botkit.log('Failed to open IM with user', err);
+    }
+    bot.startConversation({
+      user: username,
+      channel: res.channel.id,
+    }, (error, convo) => {
+      convo.say(`Please pep up ${recipient} with positive feedback for the week \n Type 'tell @${recipient}' and a message to send your peppy message anonymously`);
+    });
+  });
+}
+
+// Loops through the users in the team,
+// for each user calls the sendMondayMessage function to determine the recipient
 function findUserAndRecipient(bot) {
     // controller.hears(['test'], 'direct_message', function(bot, message) {
   bot.api.users.list({}, (err, response) => {
@@ -221,30 +232,13 @@ function findUserAndRecipient(bot) {
       });
       const weekNumber = moment('11-15-2016', 'MM-DD-YYYY').week();
       const counter = weekNumber % members.length;
-      console.log(counter);
-      for (let i = 0; i < members.length; i++) {
+      for (let i = 0; i < members.length; i + 1) {
         const username = members[i];
         const counter2 = (i + counter) % members.length;
         const recipient = members[counter2].name;
         sendMondayMessage(bot, username, recipient);
       }
     }
-  });
-}
-
-function sendMondayMessage(bot, username, recipient) {
-  bot.api.im.open({
-    user: username.id,
-  }, (err, res) => {
-    if (err) {
-      bot.botkit.log('Failed to open IM with user', err);
-    }
-    bot.startConversation({
-      user: username,
-      channel: res.channel.id,
-    }, (err, convo) => {
-      convo.say(`Please pep up ${recipient} with positive feedback for the week \n Type \'tell @${recipient} \' and a message to send your peppy message anonymously`);
-    });
   });
 }
 
@@ -258,21 +252,15 @@ function sendEncouragement(bot, username, encouragement) {
     bot.startConversation({
       user: username,
       channel: res.channel.id,
-    }, (err, convo) => {
+    }, (error, convo) => {
       convo.say(encouragement);
     });
   });
 }
 
-controller.hears(['tell @*'], 'direct_message', (bot, message) => {
-  const username = getUsername(message.text);
-  const encouragement = getEncouragement(message.text);
-  sendEncouragement(bot, username, encouragement);
-});
-
 function getUsername(message) {
   const arr = message.split(' ');
-  const username = arr[1];
+  let username = arr[1];
   username = username.toString();
   username = username.replace('@', '');
   username = username.replace('<', '');
@@ -286,12 +274,18 @@ function getEncouragement(encouragement) {
   return arr.join(' ');
 }
 
+controller.hears(['tell @*'], 'direct_message', (bot, message) => {
+  const username = getUsername(message.text);
+  const encouragement = getEncouragement(message.text);
+  sendEncouragement(bot, username, encouragement);
+});
+
 controller.hears(['pepper'], 'direct_message,direct_mention,ambient', (bot, message) => {
   bot.api.reactions.add({
     timestamp: message.ts,
     channel: message.channel,
     name: 'hot_pepper',
-  }, (err, res) => {
+  }, (err) => {
     if (err) {
       bot.botkit.log('Failed to add emoji reaction :(', err);
     }
@@ -358,7 +352,7 @@ controller.hears(['hello', 'hi', 'hey', 'yo'], 'direct_message,direct_mention,me
     timestamp: message.ts,
     channel: message.channel,
     name: 'robot_face',
-  }, (err, res) => {
+  }, (err) => {
     if (err) {
       bot.botkit.log('Failed to add emoji reaction :(', err);
     }
@@ -375,14 +369,15 @@ controller.hears(['hello', 'hi', 'hey', 'yo'], 'direct_message,direct_mention,me
 controller.hears(['call me (.*)', 'my name is (.*)'], 'direct_message,direct_mention,mention', (bot, message) => {
   const name = message.match[1];
   controller.storage.users.get(message.user, (err, user) => {
-    if (!user) {
-      user = {
-        id: message.user,
+    let currentUser = user;
+    if (!currentUser) {
+      currentUser = {
+        id: message.currentUser,
       };
     }
-    user.name = name;
-    controller.storage.users.save(user, () => {
-      bot.reply(message, `Got it. I will call you ${user.name} from now on.`);
+    currentUser.name = name;
+    controller.storage.users.save(currentUser, () => {
+      bot.reply(message, `Got it. I will call you ${currentUser.name} from now on.`);
     });
   });
 });
