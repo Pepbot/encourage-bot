@@ -12,6 +12,10 @@ const os = require('os');
 const moment = require('moment');
 // Botkit-based Redis store
 const Redis = require('./redis_storage.js');
+const formatUptime = require('./functions/format_uptime.js');
+const getAdminUsers = require('./functions/get_admin_users.js');
+const getUsername = require('./functions/get_username.js');
+const getEncouragement = require('./functions/get_encouragement.js');
 
 const redisURL = 'redis://h:pea00b467cde6d2e40b066669800b42275e206224ecd873f08af3ef3e65e08a32@ec2-34-194-51-203.compute-1.amazonaws.com:28839';
 const RedisStore = new Redis({ url: redisURL });
@@ -94,21 +98,6 @@ controller.on('rtm_close', () => {
   // you may want to attempt to re-open
 });
 
-function getAdminUsers() {
-  const adminUsers = [];
-  bot.api.users.list({}, (err, response) => {
-    if (response.hasOwnProperty('members') && response.ok) {
-      const members = response.members;
-      for (let i = 0; i < members.length; i + 1) {
-        if (members[i].is_admin) {
-          adminUsers.push(members[i]);
-        }
-      }
-    }
-  });
-  return adminUsers;
-}
-
 function sendAdminMessage(adminUsers, message) {
   for (let i = 0; i < adminUsers.length; i + 1) {
     const user = adminUsers[i];
@@ -132,8 +121,14 @@ function sendFlaggedMessageToAdmin(bot, message) {
   // var adminUsers = when(getAdminUsers).then(function(message) {
   //     sendAdminMessage(adminUsers, message);
   // }).catch(console.error);
-  const adminUsers = getAdminUsers();
-  setTimeout(() => { sendAdminMessage(adminUsers, message); }, 1000);
+  getAdminUsers()
+  .then((result) => {
+    sendAdminMessage(result, message);
+  }).catch((err) => {
+    console.log(err);
+  });
+
+  // setTimeout(() => { sendAdminMessage(adminUsers, message); }, 1000);
 }
 
 controller.hears(['flag'], 'direct_message', (bot, message) => {
@@ -199,22 +194,6 @@ function sendEncouragement(bot, username, encouragement) {
       convo.say(encouragement);
     });
   });
-}
-
-function getUsername(message) {
-  const arr = message.split(' ');
-  let username = arr[1];
-  username = username.toString();
-  username = username.replace('@', '');
-  username = username.replace('<', '');
-  username = username.replace('>', '');
-  return username;
-}
-
-function getEncouragement(encouragement) {
-  const arr = encouragement.split(' ');
-  arr.splice(0, 2);
-  return arr.join(' ');
 }
 
 controller.hears(['tell @*'], 'direct_message', (bot, message) => {
@@ -324,24 +303,6 @@ controller.hears(['call me (.*)', 'my name is (.*)'], 'direct_message,direct_men
     });
   });
 });
-
-function formatUptime(uptimeParam) {
-  let unit = 'second';
-  let uptime = uptimeParam;
-  if (uptime > 60) {
-    uptime /= 60;
-    unit = 'minute';
-  }
-  if (uptime > 60) {
-    uptime /= 60;
-    unit = 'hour';
-  }
-  if (uptime !== 1) {
-    unit = `${unit}s`;
-  }
-  uptime = `${uptime} ${unit}`;
-  return uptime;
-}
 
 controller.hears(['uptime', 'identify yourself', 'who are you', 'what is your name'],
   'direct_message,direct_mention,mention', (bot, message) => {
