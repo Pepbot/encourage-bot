@@ -43,6 +43,8 @@ if (!process.env.clientId || !process.env.clientSecret || !port) {
     console.log('Error: Specify clientId clientSecret redirectUri and port in environment');
 }
 
+console.log('running');
+
 var controller = Botkit.slackbot({
   storage: redis_store,
 }).configureSlackApp(
