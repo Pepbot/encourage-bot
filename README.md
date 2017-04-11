@@ -24,5 +24,5 @@ Shannon Hogan
 
 
 [1]: http://angelhack.com/ "AngelHack"
-[2]: https://pepper.herokuapp.com "here"
+[2]: www.pepbot.co "here"
 [3]: https://hbr.org/2016/10/give-your-team-more-effective-positive-feedback
