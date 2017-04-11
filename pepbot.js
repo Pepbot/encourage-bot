@@ -81,25 +81,25 @@ controller.on('create_bot',function(bot,config, message) {
   console.log("create bot...");
 
   console.log('message', message);
-
-  bot.reply(message, {
-  "attachments": [
-      {
-          "fallback": "Required plain-text summary of the attachment.",
-          "pretext": "Need some help? Here’s what I do:\n\nSend You Reminders: I’ll send you a message here reminding you to send some encouragement to one of your team mates each week. Like this:",
-          "text": "Hi <@" + message.user + ">! Send @[recipient name] some encouragement to pep up their day! :hot_pepper:",
-      },
-      {
-          "fallback": "Required plain-text summary of the attachment.",
-          "pretext": "Deliver Your Messages: Let me know who to send the message to by typing ‘tell’ followed by the name of your team mate. Like this:",
-          "text": "tell @name You did an awesome job this morning! :raised_hands:",
-      },
-      {
-          "fallback": "Summary",
-          "pretext": "Keep It Positive: Report any abusive comments by replying with the word ‘flag’.:triangular_flag_on_post:"
-      }
-  ]
-  });
+  //
+  // bot.reply(message, {
+  // "attachments": [
+  //     {
+  //         "fallback": "Required plain-text summary of the attachment.",
+  //         "pretext": "Need some help? Here’s what I do:\n\nSend You Reminders: I’ll send you a message here reminding you to send some encouragement to one of your team mates each week. Like this:",
+  //         "text": "Hi <@" + message.user + ">! Send @[recipient name] some encouragement to pep up their day! :hot_pepper:",
+  //     },
+  //     {
+  //         "fallback": "Required plain-text summary of the attachment.",
+  //         "pretext": "Deliver Your Messages: Let me know who to send the message to by typing ‘tell’ followed by the name of your team mate. Like this:",
+  //         "text": "tell @name You did an awesome job this morning! :raised_hands:",
+  //     },
+  //     {
+  //         "fallback": "Summary",
+  //         "pretext": "Keep It Positive: Report any abusive comments by replying with the word ‘flag’.:triangular_flag_on_post:"
+  //     }
+  // ]
+  // });
   if (_bots[bot.config.token]) {
     console.log("bot appears to already be online");
     // already online! do nothing.
