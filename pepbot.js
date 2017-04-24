@@ -30,11 +30,11 @@ var redis_store = new Redis_Store({url: redis_url});
 
 // Programmatically use appropriate process environment variables
 try {
-    require('./env.js');
+  require('./env.js');
 } catch (e) {
-    if (e.code === 'MODULE_NOT_FOUND') {
-        console.log('Not using environment variables from env.js');
-    }
+  if (e.code === 'MODULE_NOT_FOUND') {
+      console.log('Not using environment variables from env.js');
+  }
 }
 
 var port = process.env.PORT || process.env.port;
