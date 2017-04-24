@@ -6,10 +6,10 @@ var BotFrameworkBot = require(__dirname + '/BotFramework.js');
 var ConsoleBot = require(__dirname + '/ConsoleBot.js');
 
 module.exports = {
-    core: CoreBot,
-    slackbot: Slackbot,
-    facebookbot: Facebookbot,
-    twilioipmbot: TwilioIPMbot,
-    botframeworkbot: BotFrameworkBot,
-    consolebot: ConsoleBot,
+  core: CoreBot,
+  slackbot: Slackbot,
+  facebookbot: Facebookbot,
+  twilioipmbot: TwilioIPMbot,
+  botframeworkbot: BotFrameworkBot,
+  consolebot: ConsoleBot,
 };
