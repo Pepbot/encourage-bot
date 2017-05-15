@@ -6,6 +6,7 @@ WORKDIR /usr/src/app
 
 #install botkit 
 RUN npm install botkit --save 
+RUN npm install node-schedule --save
 COPY pepbot.js /usr/src/app/ 
 COPY package.json /usr/src/app/ 
 
