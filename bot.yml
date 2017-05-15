@@ -1,3 +1,14 @@
 name: Pepper the Pep Bot
 description: Pepper the Pepbot is a slack bot that allows teammates to send positive feedback anonymously to their coworkers.
 avatar: ProfilePic.png
+config:
+- name: clientId
+  friendly_name: clientId
+  info: clientId
+  type: secret
+  global: true
+- name: clientSecret
+  friendly_name: clientSecret
+  info: clientSecret
+  type: secret
+  global: true
