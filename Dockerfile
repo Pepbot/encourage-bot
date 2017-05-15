@@ -12,6 +12,7 @@ RUN npm install redis
 RUN npm install moment
 RUN npm install os
 COPY pepbot.js /usr/src/app/ 
+COPY redis_storage.js /usr/src/app/
 COPY package.json /usr/src/app/ 
 
 #set startup commands
