@@ -9,6 +9,8 @@ RUN npm install botkit --save
 RUN npm install node-schedule --save
 RUN npm install --save when
 RUN npm install redis
+RUN npm install moment
+RUN npm install os
 COPY pepbot.js /usr/src/app/ 
 COPY package.json /usr/src/app/ 
 
