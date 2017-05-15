@@ -10,4 +10,4 @@ COPY pepbot.js /usr/src/app/
 COPY package.json /usr/src/app/ 
 
 #set startup commands
-CMD ["node", "pepbot.js"]
+CMD ["npm", "start"]
