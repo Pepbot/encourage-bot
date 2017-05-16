@@ -12,3 +12,8 @@ config:
   info: clientSecret
   type: secret
   global: true
+- name: port
+  friendly_name: port
+  info: port
+  type: secret
+  global: true
