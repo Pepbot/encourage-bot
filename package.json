@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "botkit": "^0.4.7",
+    "botkit-storage-beepboop": "^1.0.0",
     "node-schedule": "^1.2.1",
     "redis": "*",
     "when": "^3.7.8"

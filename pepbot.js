@@ -22,6 +22,7 @@ var schedule = require('node-schedule');
 var os = require('os');
 var when = require('when');
 var moment = require('moment');
+var BotkitStorageBeepBoop = require('botkit-storage-beepboop');
 
 // Botkit-based Redis store
 var Redis_Store = require('./redis_storage.js');
@@ -44,7 +45,7 @@ if (!process.env.clientId || !process.env.clientSecret || !port) {
 }
 
 var controller = Botkit.slackbot({
-  storage: redis_store,
+  storage: BotkitStorageBeepBoop(),
 }).configureSlackApp(
   {
     clientId: process.env.clientId,
