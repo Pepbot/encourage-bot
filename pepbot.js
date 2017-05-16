@@ -16,7 +16,7 @@ This bot demonstrates many of the core features of Botkit:
 * Use the conversation system to ask questions
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-
+"use strict";
 var Botkit = require('botkit');
 var schedule = require('node-schedule');
 var os = require('os');
